@@ -1,0 +1,154 @@
+plugins {
+    id 'java'
+    id 'signing'
+    id 'maven'
+    id 'jacoco'
+    id 'pl.allegro.tech.build.axion-release' version '1.9.2'
+    id 'com.github.kt3k.coveralls' version '2.8.2'
+}
+
+scmVersion {
+    tag {
+        prefix = 'RELEASE'
+    }
+}
+
+group 'uk.co.caeldev'
+project.version = scmVersion.version
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    implementation "ch.qos.logback:logback-classic:1.2.1"
+    implementation "com.google.guava:guava:27.0-jre"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.2.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.2.0"
+    testImplementation "org.assertj:assertj-core:3.10.0"
+    testImplementation "uk.org.fyodor:fyodor-core:1.0.0"
+
+    testImplementation "org.mockito:mockito-junit-jupiter:2.25.0"
+
+
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.2.0"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+jar {
+    archivesBaseName = rootProject.name
+    group = group
+    version = version
+    manifest {
+        attributes 'Implementation-Title': 'cassitory',
+                'Implementation-Version': version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Built-Gradle': gradle.gradleVersion
+    }
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+    required = { gradle.taskGraph.hasTask("uploadArchives") && !version.endsWith("SNAPSHOT") }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.enabled false
+    }
+}
+
+coveralls {
+    jacocoReportPath 'build/reports/jacoco/test/jacocoTestReport.xml'
+}
+
+tasks.coveralls {
+    dependsOn 'check'
+}
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        events 'PASSED', 'FAILED', 'SKIPPED'
+    }
+
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpDir = file("$buildDir/jacoco/classpathdumps")
+    }
+}
+
+def ossUsername = hasProperty('ossrhUsername') ? ossrhUsername : System.getenv('ossrhUsername')
+def ossPassword = hasProperty('ossrhPassword') ? ossrhPassword : System.getenv('ossrhPassword')
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: "${ossUsername}", password: "${ossPassword}")
+            }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                authentication(userName: "${ossUsername}", password: "${ossPassword}")
+            }
+
+            //repository(url: "/Users/me/.m2/repository")
+
+            pom.project {
+
+                name 'builder4test'
+                packaging "jar"
+
+                description "Library to build your own test builders in a easy way"
+                url "https://github.com/caelcs/cassitory"
+
+                scm {
+                    url "https://github.com/caelcs/cassitory.git"
+                    connection "https://github.com/caelcs/cassitory.git"
+                    developerConnection "https://github.com/caelcs/cassitory.git"
+                }
+
+                licenses {
+                    license {
+                        name "MIT"
+                        url "http://opensource.org/licenses/MIT"
+                        distribution "repo"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id "caelcs"
+                        name "Adolfo E Custidiano S"
+                        email "adolfoecs@gmail.com"
+                    }
+                }
+            }
+        }
+    }
+}
