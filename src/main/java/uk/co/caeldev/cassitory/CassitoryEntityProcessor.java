@@ -12,6 +12,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,22 +38,26 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         Map<String, String> elements = findElements(roundEnv);
 
-        createClasses(elements);
+        List<JavaFile> classes = createClasses(elements);
+
+        for (JavaFile it: classes) {
+            try {
+                it.writeTo(filer);
+            } catch (IOException e) {
+                return false;
+            }
+        }
 
         return false;
     }
 
-    private void createClasses(Map<String, String> elements) {
-        elements.entrySet().stream().forEach(element -> {
-                    TypeSpec.Builder typeSpec = TypeSpec
-                            .classBuilder(element.getKey()+"Creators")
-                            .addModifiers(Modifier.PUBLIC);
-            try {
-                JavaFile.builder(element.getValue(), typeSpec.build()).build().writeTo(filer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+    private List<JavaFile> createClasses(Map<String, String> elements) {
+        return elements.entrySet().stream().map(element -> {
+            TypeSpec.Builder typeSpec = TypeSpec
+                    .classBuilder(String.format("%sCreators", element.getKey()))
+                    .addModifiers(Modifier.PUBLIC);
+            return JavaFile.builder(element.getValue(), typeSpec.build()).build();
+        }).collect(Collectors.toList());
     }
 
     private Map<String, String> findElements(RoundEnvironment roundEnv) {
