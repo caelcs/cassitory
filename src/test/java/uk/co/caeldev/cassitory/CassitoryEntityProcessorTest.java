@@ -46,6 +46,4 @@ class CassitoryEntityProcessorTest {
 
         assertThat(compilation).hadErrorCount(1);
     }
-
-
 }
