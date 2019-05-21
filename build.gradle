@@ -29,6 +29,8 @@ dependencies {
     implementation "com.google.guava:guava:27.1-jre"
     implementation "com.datastax.cassandra:cassandra-driver-mapping:3.7.1"
     implementation "com.datastax.cassandra:cassandra-driver-core:3.7.1"
+    implementation "com.squareup:javapoet:1.11.1"
+    implementation "com.google.auto.service:auto-service:1.0-rc5"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.4.1"
     testImplementation "org.junit.jupiter:junit-jupiter-params:5.4.1"
@@ -36,6 +38,7 @@ dependencies {
     testImplementation "uk.org.fyodor:fyodor-core:1.0.0"
     testImplementation "org.mockito:mockito-junit-jupiter:2.27.0"
     testImplementation "org.cassandraunit:cassandra-unit:3.5.0.1"
+    testImplementation "com.google.testing.compile:compile-testing:0.17"
 
     testRuntime "org.junit.jupiter:junit-jupiter-engine:5.4.1"
 }
