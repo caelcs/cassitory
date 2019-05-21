@@ -44,13 +44,11 @@ dependencies {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
     from 'build/docs/javadoc'
 }
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
-    classifier = 'sources'
 }
 
 jar {
@@ -160,8 +158,6 @@ uploadArchives {
 }
 
 wrapper {
-
     distributionType = Wrapper.DistributionType.ALL
     gradleVersion = '5.4.1'
-
 }
