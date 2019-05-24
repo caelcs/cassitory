@@ -2,9 +2,9 @@ package entities;
 
 import uk.co.caeldev.cassitory.CassitoryEntity;
 
-public class Foo {
+public class FooInvalid {
 
-    @CassitoryEntity
+    @CassitoryEntity(target = {})
     private String value;
 
 }
