@@ -10,7 +10,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import java.io.IOException;
@@ -65,7 +64,7 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
                     .addMethod(constructor.apply(classAnnotated))
                     .addModifiers(Modifier.PUBLIC);
 
-            List<? extends TypeMirror> targetClasses = targetCassandraEntityFrom.apply(classAnnotated.getAnnotation(CassitoryEntity.class));
+            List<String> targetClasses = CassitoryEntityFunctions.targetClasses.apply(classAnnotated, CassitoryEntity.class);
 
             validateDuplicateTargetClasses(targetClasses);
 
@@ -77,7 +76,7 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         }).collect(toList());
     }
 
-    private void validateDuplicateTargetClasses(List<? extends TypeMirror> targetClasses) {
+    private void validateDuplicateTargetClasses(List<String> targetClasses) {
         try {
             validateMappingTarget.accept(targetClasses);
         } catch (IllegalArgumentException ex) {
@@ -85,12 +84,12 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateCreatorListField(TypeSpec.Builder type, List<? extends TypeMirror> targetClasses) {
+    private void generateCreatorListField(TypeSpec.Builder type, List<String> targetClasses) {
         ParameterizedTypeName collectionTypeName = ParameterizedTypeName.get(List.class, Supplier.class);
 
         String creatorArguments = targetClasses.stream()
                 .map(targetCassandraEntityClass -> {
-                    ClassName className = ClassName.bestGuess(targetCassandraEntityClass.toString());
+                    ClassName className = ClassName.bestGuess(targetCassandraEntityClass);
                     return creatorFieldNameClassName.apply(className);
                 })
                 .collect(Collectors.joining(", "));
@@ -103,9 +102,9 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         type.addField(creators);
     }
 
-    private void generateCreatorFields(TypeElement classAnnotated, TypeSpec.Builder type, List<? extends TypeMirror> targetClasses) {
+    private void generateCreatorFields(TypeElement classAnnotated, TypeSpec.Builder type, List<String> targetClasses) {
         targetClasses.stream()
-                .map(it -> ClassName.bestGuess(it.toString()))
+                .map(it -> ClassName.bestGuess(it))
                 .peek(it -> type.addMethod(createCreatorMethod(classAnnotated, it)))
                 .forEach(targetCassandraEntityClass -> {
                     ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(Supplier.class), targetCassandraEntityClass);

@@ -1,15 +1,16 @@
 package uk.co.caeldev.cassitory;
 
+import com.google.common.collect.Lists;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import org.apache.commons.text.WordUtils;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.MirroredTypesException;
-import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -17,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 
 final class CassitoryEntityFunctions {
 
@@ -37,37 +39,28 @@ final class CassitoryEntityFunctions {
             .addStatement("this.$N = $N", fieldName.apply(element), fieldName.apply(element))
             .build();
 
-    static Function<CassitoryEntity, List<? extends TypeMirror>> targetCassandraEntityFrom = (annotation) -> {
-        try {
-            annotation.target();
-        } catch( MirroredTypesException mte ) {
-            return mte.getTypeMirrors();
+    static BiFunction<Element, Class<? extends Annotation>, List<String>> targetClasses = (Element classAnnotated, Class<? extends Annotation> annotation) -> {
+        Optional<? extends AnnotationMirror> opAnnotation = classAnnotated.getAnnotationMirrors().stream().filter(it -> it.getAnnotationType().toString().equals(annotation.getName())).findFirst();
+        if (opAnnotation.isPresent()) {
+            return ((List<?>)opAnnotation.get().getElementValues().values().stream().findFirst().get().getValue())
+                    .stream().map(it -> it.toString().split(".class")[0]).collect(toList());
         }
-        return null;
-    };
-
-    static Function<Mapping, List<? extends TypeMirror>> targetMappingFrom = (annotation) -> {
-        try {
-            annotation.target();
-        } catch( MirroredTypesException mte ) {
-            return mte.getTypeMirrors();
-        }
-        return null;
+        return Lists.newArrayList();
     };
 
     static Function<Element, String> valueOf = (Element it) -> it.getAnnotation(Mapping.class).field();
 
-    static Consumer<List<? extends TypeMirror>> validateMappingTarget = (List<? extends TypeMirror> targets) -> {
-        Set<String> uniqueTargets = targets.stream().map(it -> it.toString()).collect(Collectors.toSet());
+    static Consumer<List<String>> validateMappingTarget = (List<String> targets) -> {
+        Set<String> uniqueTargets = targets.stream().collect(Collectors.toSet());
         if (uniqueTargets.size() != targets.size()) {
             throw new IllegalArgumentException("Target contains duplicated classes");
         }
     };
 
     static BiFunction<ClassName, Element, Boolean> containsTargetEntityClass = (ClassName targetCassandraEntity, Element element) -> {
-        List<? extends TypeMirror> targets = targetMappingFrom.apply(element.getAnnotation(Mapping.class));
+        List<String> targets = targetClasses.apply(element, Mapping.class);
         validateMappingTarget.accept(targets);
-        return targets.stream().anyMatch(itr -> itr.toString().equals(targetCassandraEntity.toString()));
+        return targets.stream().anyMatch(itr -> itr.equals(targetCassandraEntity.toString()));
     };
 
     static BiFunction<TypeElement, ClassName, Map<String, String>> fieldMapping = (TypeElement entityClassElement, ClassName targetCassandraEntity) ->
