@@ -25,6 +25,45 @@ class CassitoryEntityProcessorTest {
     }
 
     @Test
+    @DisplayName("Should fail when CassitoryEntity annotation contains duplicated target classes")
+    public void shouldFailWhenCassitoryEntityContainsDuplicatedClasses() {
+        Compilation compilation =
+                javac()
+                        .withProcessors(new CassitoryEntityProcessor())
+                        .compile(JavaFileObjects.forResource("entities/FooInvalid6.java"));
+
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
+    @DisplayName("Should fail when Mapping annotation contains duplicated target classes")
+    public void shouldFailWhenMappingContainsDuplicatedClasses() {
+        Compilation compilation =
+                javac()
+                        .withProcessors(new CassitoryEntityProcessor())
+                        .compile(JavaFileObjects.forResource("entities/FooInvalid7.java"));
+
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
+    @DisplayName("Should fail when Mapping annotation has empty field")
+    public void shouldFailWhenMappingHasEmptyField() {
+        Compilation compilation =
+                javac()
+                        .withProcessors(new CassitoryEntityProcessor())
+                        .compile(JavaFileObjects.forResource("entities/FooInvalid8.java"));
+
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("Field cannot be empty.");
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
     @DisplayName("Should fail when CassitoryEntity annotation is repeated")
     public void shouldFailWhenCassitoryEntityAnnotatedIsRepeated() {
         Compilation compilation =

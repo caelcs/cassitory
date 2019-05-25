@@ -10,7 +10,9 @@ import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,7 +57,18 @@ final class CassitoryEntityFunctions {
 
     static Function<Element, String> valueOf = (Element it) -> it.getAnnotation(Mapping.class).field();
 
-    static BiFunction<ClassName, Element, Boolean> containsTargetEntityClass = (ClassName targetCassandraEntity, Element it) -> targetMappingFrom.apply(it.getAnnotation(Mapping.class)).stream().anyMatch(itr -> itr.toString().equals(targetCassandraEntity.toString()));
+    static Consumer<List<? extends TypeMirror>> validateMappingTarget = (List<? extends TypeMirror> targets) -> {
+        Set<String> uniqueTargets = targets.stream().map(it -> it.toString()).collect(Collectors.toSet());
+        if (uniqueTargets.size() != targets.size()) {
+            throw new IllegalArgumentException("Target contains duplicated classes");
+        }
+    };
+
+    static BiFunction<ClassName, Element, Boolean> containsTargetEntityClass = (ClassName targetCassandraEntity, Element element) -> {
+        List<? extends TypeMirror> targets = targetMappingFrom.apply(element.getAnnotation(Mapping.class));
+        validateMappingTarget.accept(targets);
+        return targets.stream().anyMatch(itr -> itr.toString().equals(targetCassandraEntity.toString()));
+    };
 
     static BiFunction<TypeElement, ClassName, Map<String, String>> fieldMapping = (TypeElement entityClassElement, ClassName targetCassandraEntity) ->
             entityClassElement.getEnclosedElements().stream()
@@ -63,4 +76,12 @@ final class CassitoryEntityFunctions {
                     .filter(it -> nonNull(it.getAnnotation(Mapping.class)))
                     .filter(it -> containsTargetEntityClass.apply(targetCassandraEntity, it))
                     .collect(Collectors.toMap((iter) -> iter.getSimpleName().toString(), (iter) -> valueOf.apply(iter)));
+
+    static Function<Map<String, String>, Map<String, String>> fieldValidation = (fieldMappings) -> {
+        List<Map.Entry<String, String>> entries = fieldMappings.entrySet().stream().filter(entry -> !entry.getValue().isEmpty()).collect(Collectors.toList());
+        if (entries.size() != fieldMappings.entrySet().size()) {
+            throw new IllegalArgumentException("Field cannot be empty.");
+        }
+        return fieldMappings;
+    };
 }

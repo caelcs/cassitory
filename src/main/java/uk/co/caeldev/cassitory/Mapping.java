@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Mapping {
     Class<?>[] target();
-    String field();
+    String field() default "";
 }

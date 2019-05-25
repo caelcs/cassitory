@@ -1,6 +1,7 @@
 package uk.co.caeldev.cassitory;
 
 import com.google.auto.service.AutoService;
+import com.google.common.collect.Maps;
 import com.squareup.javapoet.*;
 import org.apache.commons.text.WordUtils;
 
@@ -9,6 +10,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import java.io.IOException;
@@ -56,28 +58,41 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
     }
 
     private List<JavaFile> createClasses(List<TypeElement> elementsAnnotated) {
-        return elementsAnnotated.stream().map(element -> {
+        return elementsAnnotated.stream().map(classAnnotated -> {
             TypeSpec.Builder type = TypeSpec
-                    .classBuilder(creatorClassName.apply(element))
-                    .addField(entityField.apply(element))
-                    .addMethod(constructor.apply(element))
+                    .classBuilder(creatorClassName.apply(classAnnotated))
+                    .addField(entityField.apply(classAnnotated))
+                    .addMethod(constructor.apply(classAnnotated))
                     .addModifiers(Modifier.PUBLIC);
 
-            generateCreatorFields(element, type);
-            generateCreatorListField(element, type);
+            List<? extends TypeMirror> targetClasses = targetCassandraEntityFrom.apply(classAnnotated.getAnnotation(CassitoryEntity.class));
 
-            return JavaFile.builder(this.elements.getPackageOf(element).getQualifiedName().toString(), type.build())
+            validateDuplicateTargetClasses(targetClasses);
+
+            generateCreatorFields(classAnnotated, type, targetClasses);
+            generateCreatorListField(type, targetClasses);
+
+            return JavaFile.builder(this.elements.getPackageOf(classAnnotated).getQualifiedName().toString(), type.build())
                     .addStaticImport(ClassName.get("com.google.common.collect", "Lists"), "newArrayList").build();
         }).collect(toList());
     }
 
-    private void generateCreatorListField(TypeElement classAnnotated, TypeSpec.Builder type) {
+    private void validateDuplicateTargetClasses(List<? extends TypeMirror> targetClasses) {
+        try {
+            validateMappingTarget.accept(targetClasses);
+        } catch (IllegalArgumentException ex) {
+            messager.printMessage(Diagnostic.Kind.ERROR, ex.getMessage());
+        }
+    }
+
+    private void generateCreatorListField(TypeSpec.Builder type, List<? extends TypeMirror> targetClasses) {
         ParameterizedTypeName collectionTypeName = ParameterizedTypeName.get(List.class, Supplier.class);
 
-        String creatorArguments = targetCassandraEntityFrom.apply(classAnnotated.getAnnotation(CassitoryEntity.class)).stream()
+        String creatorArguments = targetClasses.stream()
                 .map(targetCassandraEntityClass -> {
                     ClassName className = ClassName.bestGuess(targetCassandraEntityClass.toString());
-                    return creatorFieldNameClassName.apply(className);})
+                    return creatorFieldNameClassName.apply(className);
+                })
                 .collect(Collectors.joining(", "));
 
         FieldSpec creators = FieldSpec.builder(collectionTypeName, "creators")
@@ -88,8 +103,8 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         type.addField(creators);
     }
 
-    private void generateCreatorFields(TypeElement classAnnotated, TypeSpec.Builder type) {
-        targetCassandraEntityFrom.apply(classAnnotated.getAnnotation(CassitoryEntity.class)).stream()
+    private void generateCreatorFields(TypeElement classAnnotated, TypeSpec.Builder type, List<? extends TypeMirror> targetClasses) {
+        targetClasses.stream()
                 .map(it -> ClassName.bestGuess(it.toString()))
                 .peek(it -> type.addMethod(createCreatorMethod(classAnnotated, it)))
                 .forEach(targetCassandraEntityClass -> {
@@ -112,12 +127,21 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
 
     private CodeBlock buildCreateMethodBody(TypeElement classAnnotated, ClassName targetCassandraEntityClass) {
         CodeBlock.Builder methodBody = CodeBlock.builder().addStatement("$T $N = new $T()", targetCassandraEntityClass, fieldNameClassName.apply(targetCassandraEntityClass), targetCassandraEntityClass);
-        Map<String, String> fieldMapping = CassitoryEntityFunctions.fieldMapping.apply(classAnnotated, targetCassandraEntityClass);
+        Map<String, String> fieldMapping = getFieldMappings(classAnnotated, targetCassandraEntityClass);
         fieldMapping.entrySet().stream().forEach(it ->
-            methodBody.addStatement("$N.set$N($N.get$N())", fieldNameClassName.apply(targetCassandraEntityClass), WordUtils.capitalize(it.getValue()), fieldNameClassName.apply(ClassName.get(classAnnotated)), WordUtils.capitalize(it.getKey()))
+                methodBody.addStatement("$N.set$N($N.get$N())", fieldNameClassName.apply(targetCassandraEntityClass), WordUtils.capitalize(it.getValue()), fieldNameClassName.apply(ClassName.get(classAnnotated)), WordUtils.capitalize(it.getKey()))
         );
         methodBody.addStatement("return $N", fieldNameClassName.apply(targetCassandraEntityClass));
         return methodBody.build();
+    }
+
+    private Map<String, String> getFieldMappings(TypeElement classAnnotated, ClassName targetCassandraEntityClass) {
+        try {
+            return fieldValidation.apply(CassitoryEntityFunctions.fieldMapping.apply(classAnnotated, targetCassandraEntityClass));
+        } catch (IllegalArgumentException ex) {
+            messager.printMessage(Diagnostic.Kind.ERROR, ex.getMessage());
+            return Maps.newHashMap();
+        }
     }
 
     private CodeBlock creatorInit(ClassName targetCassandraEntityClass) {
