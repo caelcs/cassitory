@@ -23,6 +23,7 @@ final class CassitoryEntityFunctions {
     static final Function<TypeElement, String> fieldName = (element) -> WordUtils.uncapitalize(className.apply(element).toString());
     static final Function<ClassName, String> fieldNameClassName = (element) -> WordUtils.uncapitalize(element.simpleName());
     static final Function<ClassName, String> creatorFieldNameClassName = (element) -> String.format("%sCreator", fieldNameClassName.apply(element));
+    static final Function<ClassName, String> createTargetEntityMethodName = (element) -> String.format("create%s", element.simpleName());
 
 
     static final Function<TypeElement, FieldSpec> entityField = (element) -> FieldSpec.builder(ClassName.get(element), fieldName.apply(element))

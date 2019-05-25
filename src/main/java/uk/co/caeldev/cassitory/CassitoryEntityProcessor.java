@@ -55,8 +55,8 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         return false;
     }
 
-    private List<JavaFile> createClasses(List<TypeElement> elements) {
-        return elements.stream().map(element -> {
+    private List<JavaFile> createClasses(List<TypeElement> elementsAnnotated) {
+        return elementsAnnotated.stream().map(element -> {
             TypeSpec.Builder type = TypeSpec
                     .classBuilder(creatorClassName.apply(element))
                     .addField(entityField.apply(element))
@@ -71,12 +71,12 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         }).collect(toList());
     }
 
-    private void generateCreatorListField(TypeElement element, TypeSpec.Builder type) {
+    private void generateCreatorListField(TypeElement classAnnotated, TypeSpec.Builder type) {
         ParameterizedTypeName collectionTypeName = ParameterizedTypeName.get(List.class, Supplier.class);
 
-        String creatorArguments = targetCassandraEntityFrom.apply(element.getAnnotation(CassitoryEntity.class)).stream()
-                .map(clazz -> {
-                    ClassName className = ClassName.bestGuess(clazz.toString());
+        String creatorArguments = targetCassandraEntityFrom.apply(classAnnotated.getAnnotation(CassitoryEntity.class)).stream()
+                .map(targetCassandraEntityClass -> {
+                    ClassName className = ClassName.bestGuess(targetCassandraEntityClass.toString());
                     return creatorFieldNameClassName.apply(className);})
                 .collect(Collectors.joining(", "));
 
@@ -88,35 +88,40 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         type.addField(creators);
     }
 
-    private void generateCreatorFields(TypeElement element, TypeSpec.Builder type) {
-        targetCassandraEntityFrom.apply(element.getAnnotation(CassitoryEntity.class)).stream()
+    private void generateCreatorFields(TypeElement classAnnotated, TypeSpec.Builder type) {
+        targetCassandraEntityFrom.apply(classAnnotated.getAnnotation(CassitoryEntity.class)).stream()
                 .map(it -> ClassName.bestGuess(it.toString()))
-                .peek(it -> type.addMethod(createCreatorMethod(element, it)))
-                .forEach(targetCassandraEntity -> {
-                    ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(Supplier.class), targetCassandraEntity);
-                    FieldSpec fieldSpec = FieldSpec.builder(parameterizedTypeName, creatorFieldNameClassName.apply(targetCassandraEntity))
+                .peek(it -> type.addMethod(createCreatorMethod(classAnnotated, it)))
+                .forEach(targetCassandraEntityClass -> {
+                    ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(Supplier.class), targetCassandraEntityClass);
+                    FieldSpec fieldSpec = FieldSpec.builder(parameterizedTypeName, creatorFieldNameClassName.apply(targetCassandraEntityClass))
                             .addModifiers(Modifier.PRIVATE)
-                            .initializer(creatorInit(targetCassandraEntity))
+                            .initializer(creatorInit(targetCassandraEntityClass))
                             .build();
 
                     type.addField(fieldSpec);
                 });
     }
 
-    private MethodSpec createCreatorMethod(TypeElement element, ClassName targetCassandraEntity) {
-        MethodSpec.Builder method = MethodSpec.methodBuilder("create" + targetCassandraEntity.simpleName()).returns(targetCassandraEntity).addModifiers(Modifier.PRIVATE);
-        CodeBlock.Builder methodBody = CodeBlock.builder().addStatement("$T $N = new $T()", targetCassandraEntity, fieldNameClassName.apply(targetCassandraEntity), targetCassandraEntity);
-        Map<String, String> fieldMapping = CassitoryEntityFunctions.fieldMapping.apply(element, targetCassandraEntity);
-        fieldMapping.entrySet().stream().forEach(it ->
-            methodBody.addStatement("$N.set$N($N.get$N())", fieldNameClassName.apply(targetCassandraEntity), WordUtils.capitalize(it.getValue()), fieldNameClassName.apply(ClassName.get(element)), WordUtils.capitalize(it.getKey()))
-        );
-        methodBody.addStatement("return $N", fieldNameClassName.apply(targetCassandraEntity));
-        method.addCode(methodBody.build());
+    private MethodSpec createCreatorMethod(TypeElement classAnnotated, ClassName targetCassandraEntityClass) {
+        MethodSpec.Builder method = MethodSpec.methodBuilder(createTargetEntityMethodName.apply(targetCassandraEntityClass))
+                .returns(targetCassandraEntityClass).addModifiers(Modifier.PRIVATE);
+        method.addCode(buildCreateMethodBody(classAnnotated, targetCassandraEntityClass));
         return method.build();
     }
 
-    private CodeBlock creatorInit(ClassName clazz) {
-        return CodeBlock.of("() -> create$N()", clazz.simpleName());
+    private CodeBlock buildCreateMethodBody(TypeElement classAnnotated, ClassName targetCassandraEntityClass) {
+        CodeBlock.Builder methodBody = CodeBlock.builder().addStatement("$T $N = new $T()", targetCassandraEntityClass, fieldNameClassName.apply(targetCassandraEntityClass), targetCassandraEntityClass);
+        Map<String, String> fieldMapping = CassitoryEntityFunctions.fieldMapping.apply(classAnnotated, targetCassandraEntityClass);
+        fieldMapping.entrySet().stream().forEach(it ->
+            methodBody.addStatement("$N.set$N($N.get$N())", fieldNameClassName.apply(targetCassandraEntityClass), WordUtils.capitalize(it.getValue()), fieldNameClassName.apply(ClassName.get(classAnnotated)), WordUtils.capitalize(it.getKey()))
+        );
+        methodBody.addStatement("return $N", fieldNameClassName.apply(targetCassandraEntityClass));
+        return methodBody.build();
+    }
+
+    private CodeBlock creatorInit(ClassName targetCassandraEntityClass) {
+        return CodeBlock.of("() -> $N()", createTargetEntityMethodName.apply(targetCassandraEntityClass));
     }
 
     private List<TypeElement> findElements(RoundEnvironment roundEnv) {
