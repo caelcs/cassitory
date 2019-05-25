@@ -130,6 +130,20 @@ class CassitoryEntityProcessorTest {
     }
 
     @Test
+    @DisplayName("Should create a creator class with a constructor when there is an annotated class with arguments using different mapping field name")
+    public void shouldGenerateCreatorClassWithAnnotatedArgumentsWithDifferentMappingFieldName() {
+        Compilation compilation =
+                javac()
+                        .withProcessors(new CassitoryEntityProcessor())
+                        .compile(JavaFileObjects.forResource("entities/UserDemoDto.java"));
+
+        assertThat(compilation).succeeded();
+        assertThat(compilation)
+                .generatedSourceFile("entities.UserDemoDtoCreators")
+                .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserDemoDtoCreators.java"));
+    }
+
+    @Test
     @DisplayName("Should create a creator class with a constructor when there is an annotated class with more than one argument")
     public void shouldGenerateCreatorClassWithAnnotatedMoreArguments() {
         Compilation compilation =
