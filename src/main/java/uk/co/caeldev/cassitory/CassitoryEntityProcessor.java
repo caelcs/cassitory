@@ -7,7 +7,6 @@ import org.apache.commons.text.WordUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
@@ -149,11 +148,6 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
 
     private List<TypeElement> findElements(RoundEnvironment roundEnv) {
         return roundEnv.getElementsAnnotatedWith(CassitoryEntity.class).stream()
-                .peek(element -> {
-                    if (element.getKind() != ElementKind.CLASS) {
-                        messager.printMessage(Diagnostic.Kind.ERROR, "Can be applied to class.");
-                    }
-                })
                 .map(element -> (TypeElement) element).collect(toList());
     }
 

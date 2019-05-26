@@ -1,6 +1,5 @@
 package uk.co.caeldev.cassitory;
 
-import com.google.common.collect.Lists;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -41,11 +40,11 @@ final class CassitoryEntityFunctions {
 
     static BiFunction<Element, Class<? extends Annotation>, List<String>> targetClasses = (Element classAnnotated, Class<? extends Annotation> annotation) -> {
         Optional<? extends AnnotationMirror> opAnnotation = classAnnotated.getAnnotationMirrors().stream().filter(it -> it.getAnnotationType().toString().equals(annotation.getName())).findFirst();
-        if (opAnnotation.isPresent()) {
-            return ((List<?>)opAnnotation.get().getElementValues().values().stream().findFirst().get().getValue())
-                    .stream().map(it -> it.toString().split(".class")[0]).collect(toList());
-        }
-        return Lists.newArrayList();
+
+        opAnnotation.orElseThrow(() -> new IllegalArgumentException(String.format("%s not present.", annotation.getName())));
+
+        return ((List<?>)opAnnotation.get().getElementValues().values().stream().findFirst().get().getValue())
+                .stream().map(it -> it.toString().split(".class")[0]).collect(toList());
     };
 
     static Function<Element, String> valueOf = (Element it) -> it.getAnnotation(Mapping.class).field();
