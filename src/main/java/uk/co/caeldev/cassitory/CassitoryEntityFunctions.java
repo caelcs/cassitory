@@ -49,16 +49,22 @@ final class CassitoryEntityFunctions {
 
     static Function<Element, String> valueOf = (Element it) -> it.getAnnotation(Mapping.class).field();
 
-    static Consumer<List<String>> validateMappingTarget = (List<String> targets) -> {
+    static Consumer<List<String>> validateDuplicateTargetClasses = (List<String> targets) -> {
         Set<String> uniqueTargets = targets.stream().collect(Collectors.toSet());
         if (uniqueTargets.size() != targets.size()) {
             throw new IllegalArgumentException("Target contains duplicated classes");
         }
     };
 
+    static Consumer<List<String>> validateEmptyTargetClasses = (List<String> targets) -> {
+        if (targets.isEmpty()) {
+            throw new IllegalArgumentException("Target cannot by empty");
+        }
+    };
+
     static BiFunction<ClassName, Element, Boolean> containsTargetEntityClass = (ClassName targetCassandraEntity, Element element) -> {
         List<String> targets = targetClasses.apply(element, Mapping.class);
-        validateMappingTarget.accept(targets);
+        validateDuplicateTargetClasses.accept(targets);
         return targets.stream().anyMatch(itr -> itr.equals(targetCassandraEntity.toString()));
     };
 

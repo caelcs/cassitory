@@ -65,7 +65,7 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
 
             List<String> targetClasses = CassitoryEntityFunctions.targetClasses.apply(classAnnotated, CassitoryEntity.class);
 
-            validateDuplicateTargetClasses(targetClasses);
+            validateTargetClasses(targetClasses);
 
             generateCreatorFields(classAnnotated, type, targetClasses);
             generateCreatorListField(type, targetClasses);
@@ -75,9 +75,10 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         }).collect(toList());
     }
 
-    private void validateDuplicateTargetClasses(List<String> targetClasses) {
+    private void validateTargetClasses(List<String> targetClasses) {
         try {
-            validateMappingTarget.accept(targetClasses);
+            validateDuplicateTargetClasses.accept(targetClasses);
+            validateEmptyTargetClasses.accept(targetClasses);
         } catch (IllegalArgumentException ex) {
             messager.printMessage(Diagnostic.Kind.ERROR, ex.getMessage());
         }

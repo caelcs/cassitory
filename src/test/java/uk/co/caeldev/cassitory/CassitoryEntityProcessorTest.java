@@ -3,6 +3,7 @@ package uk.co.caeldev.cassitory;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -11,112 +12,128 @@ import static com.google.testing.compile.Compiler.javac;
 
 class CassitoryEntityProcessorTest {
 
-    @Test
-    @DisplayName("Should fail when CassitoryEntity annotation is at field level")
-    public void shouldFailWhenCassitoryEntityAnnotatedAtFieldLevel() {
-        Compilation compilation =
-                javac()
-                        .withProcessors(new CassitoryEntityProcessor())
-                        .compile(JavaFileObjects.forResource("entities/FooInvalid.java"));
+    @Nested
+    @DisplayName("Validation scenarios")
+    class MappingAnnotationTest {
+        @Test
+        @DisplayName("Should fail when Mapping annotation contains duplicated target classes")
+        public void shouldFailWhenMappingContainsDuplicatedClasses() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid7.java"));
 
-        assertThat(compilation).hadErrorContaining("annotation type not applicable to this kind of declaration");
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+            assertThat(compilation).hadErrorCount(1);
+        }
+
+        @Test
+        @DisplayName("Should fail when Mapping annotation has empty field")
+        public void shouldFailWhenMappingHasEmptyField() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid8.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorContaining("Field cannot be empty.");
+            assertThat(compilation).hadErrorCount(1);
+        }
+
+        @Test
+        @DisplayName("Should fail when Mapping annotation is repeated")
+        public void shouldFailWhenMappingAnnotatedIsRepeated() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid5.java"));
+
+            assertThat(compilation).hadErrorContaining("uk.co.caeldev.cassitory.Mapping is not a repeatable annotation type");
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+        }
+
+        @Test
+        @DisplayName("Should fail when Mapping annotation is at class level")
+        public void shouldFailWhenMappingAnnotatedAtClassLevel() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid2.java"));
+
+            assertThat(compilation).hadErrorContaining("annotation type not applicable to this kind of declaration");
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+        }
+
+        @Test
+        @DisplayName("Should fail when Mapping annotation is at method level")
+        public void shouldFailWhenMappingAnnotatedAtMethodLevel() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid3.java"));
+
+            assertThat(compilation).hadErrorContaining("annotation type not applicable to this kind of declaration");
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+        }
+        @Test
+        @DisplayName("Should fail when CassitoryEntity annotation is at field level")
+        public void shouldFailWhenCassitoryEntityAnnotatedAtFieldLevel() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid.java"));
+
+            assertThat(compilation).hadErrorContaining("annotation type not applicable to this kind of declaration");
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+        }
+
+        @Test
+        @DisplayName("Should fail when CassitoryEntity annotation contains duplicated target classes")
+        public void shouldFailWhenCassitoryEntityContainsDuplicatedClasses() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid6.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+            assertThat(compilation).hadErrorCount(1);
+        }
+
+        @Test
+        @DisplayName("Should fail when CassitoryEntity annotation has empty target classes")
+        public void shouldFailWhenCassitoryEntityHasEmptyTargetClasses() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid9.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorContaining("Target cannot by empty");
+            assertThat(compilation).hadErrorCount(1);
+        }
+
+        @Test
+        @DisplayName("Should fail when CassitoryEntity annotation is repeated")
+        public void shouldFailWhenCassitoryEntityAnnotatedIsRepeated() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/FooInvalid4.java"));
+
+            assertThat(compilation).hadErrorContaining("uk.co.caeldev.cassitory.CassitoryEntity is not a repeatable annotation type");
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+        }
     }
 
     @Test
-    @DisplayName("Should fail when CassitoryEntity annotation contains duplicated target classes")
-    public void shouldFailWhenCassitoryEntityContainsDuplicatedClasses() {
-        Compilation compilation =
-                javac()
-                        .withProcessors(new CassitoryEntityProcessor())
-                        .compile(JavaFileObjects.forResource("entities/FooInvalid6.java"));
-
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
-        assertThat(compilation).hadErrorCount(1);
-    }
-
-    @Test
-    @DisplayName("Should fail when Mapping annotation contains duplicated target classes")
-    public void shouldFailWhenMappingContainsDuplicatedClasses() {
-        Compilation compilation =
-                javac()
-                        .withProcessors(new CassitoryEntityProcessor())
-                        .compile(JavaFileObjects.forResource("entities/FooInvalid7.java"));
-
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
-        assertThat(compilation).hadErrorCount(1);
-    }
-
-    @Test
-    @DisplayName("Should fail when Mapping annotation has empty field")
-    public void shouldFailWhenMappingHasEmptyField() {
-        Compilation compilation =
-                javac()
-                        .withProcessors(new CassitoryEntityProcessor())
-                        .compile(JavaFileObjects.forResource("entities/FooInvalid8.java"));
-
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorContaining("Field cannot be empty.");
-        assertThat(compilation).hadErrorCount(1);
-    }
-
-    @Test
-    @DisplayName("Should fail when CassitoryEntity annotation is repeated")
-    public void shouldFailWhenCassitoryEntityAnnotatedIsRepeated() {
-        Compilation compilation =
-                javac()
-                        .withProcessors(new CassitoryEntityProcessor())
-                        .compile(JavaFileObjects.forResource("entities/FooInvalid4.java"));
-
-        assertThat(compilation).hadErrorContaining("uk.co.caeldev.cassitory.CassitoryEntity is not a repeatable annotation type");
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorCount(1);
-    }
-
-    @Test
-    @DisplayName("Should fail when Mapping annotation is repeated")
-    public void shouldFailWhenMappingAnnotatedIsRepeated() {
-        Compilation compilation =
-                javac()
-                        .withProcessors(new CassitoryEntityProcessor())
-                        .compile(JavaFileObjects.forResource("entities/FooInvalid5.java"));
-
-        assertThat(compilation).hadErrorContaining("uk.co.caeldev.cassitory.Mapping is not a repeatable annotation type");
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorCount(1);
-    }
-
-    @Test
-    @DisplayName("Should fail when Mapping annotation is at class level")
-    public void shouldFailWhenMappingAnnotatedAtClassLevel() {
-        Compilation compilation =
-                javac()
-                        .withProcessors(new CassitoryEntityProcessor())
-                        .compile(JavaFileObjects.forResource("entities/FooInvalid2.java"));
-
-        assertThat(compilation).hadErrorContaining("annotation type not applicable to this kind of declaration");
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorCount(1);
-    }
-
-    @Test
-    @DisplayName("Should fail when Mapping annotation is at method level")
-    public void shouldFailWhenMappingAnnotatedAtMethodLevel() {
-        Compilation compilation =
-                javac()
-                        .withProcessors(new CassitoryEntityProcessor())
-                        .compile(JavaFileObjects.forResource("entities/FooInvalid3.java"));
-
-        assertThat(compilation).hadErrorContaining("annotation type not applicable to this kind of declaration");
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorCount(1);
-    }
-
-    @Test
-    @DisplayName("Should create a creator class with a constructor when there is an annotated class with arguments")
+    @DisplayName("Should generate a creator class with a constructor.")
     public void shouldGenerateCreatorClassWithAnnotatedArguments() {
         Compilation compilation =
                 javac()
