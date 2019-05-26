@@ -16,7 +16,7 @@ class CassitoryEntityProcessorTest {
     @DisplayName("Validation scenarios")
     class MappingAnnotationTest {
         @Test
-        @DisplayName("Should fail when Mapping annotation contains duplicated target classes")
+        @DisplayName("Should fail when Mapping annotation has duplicated target classes")
         public void shouldFailWhenMappingContainsDuplicatedClasses() {
             Compilation compilation =
                     javac()
@@ -93,7 +93,7 @@ class CassitoryEntityProcessorTest {
         }
 
         @Test
-        @DisplayName("Should fail when CassitoryEntity annotation contains duplicated target classes")
+        @DisplayName("Should fail when CassitoryEntity annotation has duplicated target classes")
         public void shouldFailWhenCassitoryEntityContainsDuplicatedClasses() {
             Compilation compilation =
                     javac()
