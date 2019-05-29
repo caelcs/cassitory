@@ -15,6 +15,7 @@ class CassitoryEntityProcessorTest {
     @Nested
     @DisplayName("Validation scenarios")
     class MappingAnnotationTest {
+
         @Test
         @DisplayName("Should fail when Mapping annotation has duplicated target classes")
         public void shouldFailWhenMappingContainsDuplicatedClasses() {

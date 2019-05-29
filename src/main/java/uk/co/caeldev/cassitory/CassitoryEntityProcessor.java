@@ -52,7 +52,7 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
             }
         }
 
-        return false;
+        return true;
     }
 
     private List<JavaFile> createClasses(List<TypeElement> elementsAnnotated) {
