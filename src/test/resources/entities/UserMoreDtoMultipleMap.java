@@ -21,5 +21,4 @@ public class UserMoreDtoMultipleMap {
     public int getAge() {
         return age;
     }
-
 }
