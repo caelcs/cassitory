@@ -4,7 +4,6 @@ import com.squareup.javapoet.*;
 import uk.co.caeldev.cassitory.CassitoryEntity;
 import uk.co.caeldev.cassitory.repository.BaseRepository;
 
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
@@ -21,11 +20,9 @@ import static uk.co.caeldev.cassitory.generators.RepositoryFunctions.repositoryC
 
 public class RepositoryGenerator implements Generator {
 
-    private final Messager messager;
     private final Elements elements;
 
-    public RepositoryGenerator(Messager messager, Elements elements) {
-        this.messager = messager;
+    public RepositoryGenerator(Elements elements) {
         this.elements = elements;
     }
 

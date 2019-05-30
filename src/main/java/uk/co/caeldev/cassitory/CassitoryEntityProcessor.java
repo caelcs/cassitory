@@ -36,7 +36,7 @@ public class CassitoryEntityProcessor extends AbstractProcessor {
         messager = processingEnvironment.getMessager();
         elements = processingEnvironment.getElementUtils();
         generators = Lists.newArrayList(new CreatorGenerator(messager, elements),
-                new RepositoryGenerator(messager, elements));
+                new RepositoryGenerator(elements));
     }
 
     @Override

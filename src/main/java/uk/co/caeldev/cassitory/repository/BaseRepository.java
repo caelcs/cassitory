@@ -33,15 +33,32 @@ public abstract class BaseRepository<T> implements Repository<T> {
 
     @Override
     public void save(T dtoEntity) {
+        Function<Supplier, Statement> saveQuery = (it) -> {
+            Object entity = it.get();
+            Mapper mapper = mappers.get(entity.getClass());
+            return mapper.saveQuery(entity);
+        };
+
+        execute(dtoEntity, saveQuery);
+    }
+
+    @Override
+    public void delete(T dtoEntity) {
+        Function<Supplier, Statement> deleteQuery = (it) -> {
+            Object entity = it.get();
+            Mapper mapper = mappers.get(entity.getClass());
+            return mapper.deleteQuery(entity);
+        };
+
+        execute(dtoEntity, deleteQuery);
+    }
+
+    private void execute(T dtoEntity, Function<Supplier, Statement> mapQuery) {
         List<Supplier> creators = getCreators(dtoEntity);
 
         BatchStatement batchStatement = new BatchStatement();
 
-        Set<Statement> statements = creators.stream().map(it -> {
-            Object entity = it.get();
-            Mapper mapper = mappers.get(entity.getClass());
-            return mapper.saveQuery(entity);
-        }).collect(Collectors.toSet());
+        Set<Statement> statements = creators.stream().map(mapQuery).collect(Collectors.toSet());
 
         batchStatement.addAll(statements);
 
