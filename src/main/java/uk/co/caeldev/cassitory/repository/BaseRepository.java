@@ -1,6 +1,8 @@
 package uk.co.caeldev.cassitory.repository;
 
 import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
@@ -32,28 +34,60 @@ public abstract class BaseRepository<T> implements Repository<T> {
     }
 
     @Override
-    public void save(T dtoEntity) {
+    public ResultSet save(T dtoEntity) {
         Function<Supplier, Statement> saveQuery = (it) -> {
             Object entity = it.get();
             Mapper mapper = mappers.get(entity.getClass());
             return mapper.saveQuery(entity);
         };
 
-        execute(dtoEntity, saveQuery);
+        return execute(dtoEntity, saveQuery);
     }
 
     @Override
-    public void delete(T dtoEntity) {
+    public ResultSet delete(T dtoEntity) {
         Function<Supplier, Statement> deleteQuery = (it) -> {
             Object entity = it.get();
             Mapper mapper = mappers.get(entity.getClass());
             return mapper.deleteQuery(entity);
         };
 
-        execute(dtoEntity, deleteQuery);
+        return execute(dtoEntity, deleteQuery);
     }
 
-    private void execute(T dtoEntity, Function<Supplier, Statement> mapQuery) {
+    @Override
+    public ResultSetFuture saveAsync(T dtoEntity) {
+        Function<Supplier, Statement> saveQuery = (it) -> {
+            Object entity = it.get();
+            Mapper mapper = mappers.get(entity.getClass());
+            return mapper.saveQuery(entity);
+        };
+
+        return executeAsync(dtoEntity, saveQuery);
+    }
+
+    @Override
+    public ResultSetFuture deleteAsync(T dtoEntity) {
+        Function<Supplier, Statement> deleteQuery = (it) -> {
+            Object entity = it.get();
+            Mapper mapper = mappers.get(entity.getClass());
+            return mapper.deleteQuery(entity);
+        };
+
+        return executeAsync(dtoEntity, deleteQuery);
+    }
+
+    private ResultSet execute(T dtoEntity, Function<Supplier, Statement> mapQuery) {
+        BatchStatement batchStatement = createBatchStatement(dtoEntity, mapQuery);
+        return mappingManager.getSession().execute(batchStatement);
+    }
+
+    private ResultSetFuture executeAsync(T dtoEntity, Function<Supplier, Statement> mapQuery) {
+        BatchStatement batchStatement = createBatchStatement(dtoEntity, mapQuery);
+        return mappingManager.getSession().executeAsync(batchStatement);
+    }
+
+    private BatchStatement createBatchStatement(T dtoEntity, Function<Supplier, Statement> mapQuery) {
         List<Supplier> creators = getCreators(dtoEntity);
 
         BatchStatement batchStatement = new BatchStatement();
@@ -61,7 +95,6 @@ public abstract class BaseRepository<T> implements Repository<T> {
         Set<Statement> statements = creators.stream().map(mapQuery).collect(Collectors.toSet());
 
         batchStatement.addAll(statements);
-
-        mappingManager.getSession().execute(batchStatement);
+        return batchStatement;
     }
 }

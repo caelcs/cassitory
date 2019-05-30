@@ -97,5 +97,19 @@ class UserDto {
 }
 ```
 
+### Finally
+
+After you annotate your classes Cassitory will generate a Base Repository class per class annotated.
+the convention will be, for instance if your DTO class is UserDto... you will be able to find UserDtoBaseRespository.
+
+```java
+MappingManager mappingManager;
+
+UserDtoBaseRespository repository = new UserDtoBaseRespository(mappingManager);
+
+```
+
+It can be easly integrate with Spring, Guice or any other DI framework extending this class and adding the annotation or by Java Config or Module.
+
 
 
