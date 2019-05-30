@@ -66,12 +66,6 @@ jar {
     }
 }
 
-artifacts {
-    archives jar
-    archives javadocJar
-    archives sourcesJar
-}
-
 signing {
     sign configurations.archives
     required = { gradle.taskGraph.hasTask("uploadArchives") && !version.endsWith("SNAPSHOT") }
