@@ -84,13 +84,13 @@ Following the eg. above this would looks like this.
 @CassitoryEntity(target={UserByName.class, User.class})
 class UserDto {
 	
-	@Map(target={User.class, UserByName.class}, field="userId")
+	@Mapping(target={User.class, UserByName.class}, field="userId")
 	private String id;
 
-	@Map(target={UserByName.class}, field="creationDate")
+	@Mapping(target={UserByName.class}, field="creationDate")
 	private LocalDate creationDate;
 
-	@Map(target={User.class, UserByName.class}, field="name")
+	@Mapping(target={User.class, UserByName.class}, field="name")
 	private String name;
 
     // GENERATE ALL THE GETTERS AND SETTERS
