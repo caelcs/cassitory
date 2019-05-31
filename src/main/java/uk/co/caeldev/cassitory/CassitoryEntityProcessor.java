@@ -1,6 +1,5 @@
 package uk.co.caeldev.cassitory;
 
-import com.google.auto.service.AutoService;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.JavaFile;
 import uk.co.caeldev.cassitory.generators.CreatorGenerator;
@@ -20,7 +19,6 @@ import static java.util.stream.Collectors.toList;
 
 @SupportedAnnotationTypes("uk.co.caeldev.cassitory.CassitoryEntity")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@AutoService(Processor.class)
 public class CassitoryEntityProcessor extends AbstractProcessor {
 
     private Filer filer;

@@ -27,9 +27,7 @@ dependencies {
     implementation "com.datastax.cassandra:cassandra-driver-mapping:3.7.1"
     implementation "com.datastax.cassandra:cassandra-driver-core:3.7.1"
     implementation "com.squareup:javapoet:1.11.1"
-    implementation "com.google.auto.service:auto-service:1.0-rc5"
     implementation "org.apache.commons:commons-text:1.6"
-
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.4.1"
     testImplementation "org.junit.jupiter:junit-jupiter-params:5.4.1"
@@ -156,7 +154,7 @@ publishing {
 
 signing {
     sign publishing.publications.mavenJava
-    required = { gradle.taskGraph.hasTask("uploadArchives") && !version.endsWith("SNAPSHOT") }
+    required = { gradle.taskGraph.hasTask("publish") && !version.endsWith("SNAPSHOT") }
 }
 
 wrapper {
