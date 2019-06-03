@@ -118,7 +118,7 @@ public class CreatorGenerator implements Generator {
 
     private Map<String, String> getFieldsFromMapping(TypeElement classAnnotated, ClassName targetCassandraEntityClass, BiFunction<TypeElement, ClassName, Map<String, String>> fieldsSource) {
         try {
-            return fieldValidation.apply(fieldsSource.apply(classAnnotated, targetCassandraEntityClass));
+            return fieldsSource.apply(classAnnotated, targetCassandraEntityClass);
         } catch (IllegalArgumentException ex) {
             messager.printMessage(Diagnostic.Kind.ERROR, ex.getMessage());
             return Maps.newHashMap();

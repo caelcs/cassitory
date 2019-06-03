@@ -29,19 +29,6 @@ class CassitoryEntityProcessorTest {
         }
 
         @Test
-        @DisplayName("Should fail when Mapping annotation has empty field")
-        public void shouldFailWhenMappingHasEmptyField() {
-            Compilation compilation =
-                    javac()
-                            .withProcessors(new CassitoryEntityProcessor())
-                            .compile(JavaFileObjects.forResource("entities/FooInvalid8.java"));
-
-            assertThat(compilation).failed();
-            assertThat(compilation).hadErrorContaining("Field cannot be empty.");
-            assertThat(compilation).hadErrorCount(1);
-        }
-
-        @Test
         @DisplayName("Should allow multiple Mapping annotation on same field")
         public void shouldAllowMultipleMappingAnnotatedField() {
             Compilation compilation =
@@ -321,6 +308,20 @@ class CassitoryEntityProcessorTest {
             assertThat(compilation)
                     .generatedSourceFile("entities.UserMoreDtoMultipleMapCreators")
                     .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserMoreDtoMultipleMapCreators.java"));
+        }
+
+        @Test
+        @DisplayName("Should create generator using default field name")
+        public void shouldCreateOneCreatorUsingDefaultFieldValue() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto12.java"));
+
+            assertThat(compilation).succeeded();
+            assertThat(compilation)
+                    .generatedSourceFile("entities.UserMoreDto12Creators")
+                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserMoreDto12Creators.java"));
         }
 
     }

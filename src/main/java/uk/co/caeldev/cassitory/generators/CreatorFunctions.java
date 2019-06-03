@@ -58,7 +58,7 @@ public final class CreatorFunctions {
                 .stream().map(it -> it.toString()).collect(toList());
     };
 
-    public static Function<Element, String> valueOf = (Element it) -> it.getAnnotation(Mapping.class).field();
+    public static Function<Element, String> valueOf = (Element it) -> it.getAnnotation(Mapping.class).field().isEmpty()? it.getSimpleName().toString(): it.getAnnotation(Mapping.class).field();
 
     public static BiFunction<Element, String, String> valueOfMappings = (Element it, String classAnnotated) -> {
         List<Object> annotationMirrors = it.getAnnotationMirrors().get(0).getElementValues().values().stream()
@@ -77,7 +77,9 @@ public final class CreatorFunctions {
             throw new IllegalArgumentException("Target contains duplicated classes");
         }
 
-        return fieldsMapped.get(0).trim();
+
+        String foundValue = fieldsMapped.get(0).trim();
+        return foundValue.isEmpty()? it.getSimpleName().toString(): foundValue;
     };
 
     private static Function<String, String> getField() {
@@ -132,12 +134,4 @@ public final class CreatorFunctions {
                     .filter(it -> it.getAnnotationsByType(Mappings.class).length != 0)
                     .filter(it -> containsTargetEntityClassInMappings.apply(targetCassandraEntity, it))
                     .collect(Collectors.toMap((iter) -> iter.getSimpleName().toString(), (iter) -> valueOfMappings.apply(iter, targetCassandraEntity.simpleName())));
-
-    public static Function<Map<String, String>, Map<String, String>> fieldValidation = (fieldMappings) -> {
-        List<Map.Entry<String, String>> entries = fieldMappings.entrySet().stream().filter(entry -> !entry.getValue().isEmpty()).collect(Collectors.toList());
-        if (entries.size() != fieldMappings.entrySet().size()) {
-            throw new IllegalArgumentException("Field cannot be empty.");
-        }
-        return fieldMappings;
-    };
 }
