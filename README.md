@@ -96,13 +96,12 @@ class UserDto {
 	@Mapping(target={UserByName.class}, field="creationDate")
 	private LocalDate creationDate;
 
-	@Mapping(target={User.class}, field="name")
-	@Mapping(target={UserByName.class}, field="name")
+	@Mapping(target={User.class, UserByName.class})
 	private String name;
 	
 	@Mapping(target={User.class}, field="street")
 	@Mapping(target={UserByName.class}, field="address")
-	private String name;
+	private String address;
 
     // GENERATE ALL THE GETTERS AND SETTERS
 }
