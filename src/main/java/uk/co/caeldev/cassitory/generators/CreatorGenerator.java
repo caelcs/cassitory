@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.caeldev.cassitory.CommonFunctions.destinationPackage;
 import static uk.co.caeldev.cassitory.CommonFunctions.fieldNameClassName;
 import static uk.co.caeldev.cassitory.generators.CreatorFunctions.*;
 
@@ -46,7 +47,7 @@ public class CreatorGenerator implements Generator {
             generateCreatorFields(classAnnotated, type, targetClasses);
             generateCreatorListField(type, targetClasses);
 
-            return JavaFile.builder(this.elements.getPackageOf(classAnnotated).getQualifiedName().toString(), type.build())
+            return JavaFile.builder(destinationPackage.apply(classAnnotated, this.elements), type.build())
                     .addStaticImport(ClassName.get("com.google.common.collect", "Lists"), "newArrayList").build();
         }).collect(toList());
     }

@@ -29,20 +29,6 @@ class CassitoryEntityProcessorTest {
         }
 
         @Test
-        @DisplayName("Should allow multiple Mapping annotation on same field")
-        public void shouldAllowMultipleMappingAnnotatedField() {
-            Compilation compilation =
-                    javac()
-                            .withProcessors(new CassitoryEntityProcessor())
-                            .compile(JavaFileObjects.forResource("entities/UserMoreDto2.java"));
-
-            assertThat(compilation).succeeded();
-            assertThat(compilation)
-                    .generatedSourceFile("entities.UserMoreDto2Creators")
-                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserMoreDto2Creators.java"));
-        }
-
-        @Test
         @DisplayName("Should fail when there are multiple mappings for the same field and class, also field name is invalid for one of the entities")
         public void shouldFailMultipleMappingAnnotatedField() {
             Compilation compilation =
@@ -324,6 +310,47 @@ class CassitoryEntityProcessorTest {
                     .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserMoreDto12Creators.java"));
         }
 
+        @Test
+        @DisplayName("Should create generator when there are multiple mappings and one of them has field and the other not.")
+        public void shouldCreateOneCreatorUsingDefaultFieldValueWhenMultipleMappings() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto13.java"));
+
+            assertThat(compilation).succeeded();
+            assertThat(compilation)
+                    .generatedSourceFile("entities.UserMoreDto13Creators")
+                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserMoreDto13Creators.java"));
+        }
+
+        @Test
+        @DisplayName("Should create generator in the destination package")
+        public void shouldCreateOneCreatorUsingDestinationPackage() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDtoMultipleMap2.java"));
+
+            assertThat(compilation).succeeded();
+            assertThat(compilation)
+                    .generatedSourceFile("entities.repositories.UserMoreDtoMultipleMap2Creators")
+                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/repositories/UserMoreDtoMultipleMap2Creators.java"));
+        }
+
+        @Test
+        @DisplayName("Should allow multiple Mapping annotation on same field")
+        public void shouldAllowMultipleMappingAnnotatedField() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto2.java"));
+
+            assertThat(compilation).succeeded();
+            assertThat(compilation)
+                    .generatedSourceFile("entities.UserMoreDto2Creators")
+                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserMoreDto2Creators.java"));
+        }
     }
 
     @Nested
@@ -342,6 +369,20 @@ class CassitoryEntityProcessorTest {
             assertThat(compilation)
                     .generatedSourceFile("entities.UserMoreDtoMultipleMapBaseRepository")
                     .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserMoreDtoMultipleMapBaseRepository.java"));
+        }
+
+        @Test
+        @DisplayName("Should create a repository class in destination package")
+        public void shouldCreateRepositoryClassInDestinationPackage() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDtoMultipleMap2.java"));
+
+            assertThat(compilation).succeeded();
+            assertThat(compilation)
+                    .generatedSourceFile("entities.repositories.UserMoreDtoMultipleMap2BaseRepository")
+                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/repositories/UserMoreDtoMultipleMap2BaseRepository.java"));
         }
 
     }

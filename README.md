@@ -106,7 +106,7 @@ class UserDto {
     // GENERATE ALL THE GETTERS AND SETTERS
 }
 ```
-
+NOTE: you can define the destinationPackage field in CassandraEntity where you want to generate all the classes.
 ### Finally
 
 After you annotate your classes Cassitory will generate a Base Repository class per class annotated.

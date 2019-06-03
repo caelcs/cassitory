@@ -2,6 +2,7 @@ package uk.co.caeldev.cassitory.generators;
 
 import com.squareup.javapoet.*;
 import uk.co.caeldev.cassitory.CassitoryEntity;
+import uk.co.caeldev.cassitory.CommonFunctions;
 import uk.co.caeldev.cassitory.repository.BaseRepository;
 
 import javax.lang.model.element.Modifier;
@@ -13,6 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static uk.co.caeldev.cassitory.CommonFunctions.destinationPackage;
 import static uk.co.caeldev.cassitory.CommonFunctions.fieldName;
 import static uk.co.caeldev.cassitory.generators.CreatorFunctions.creatorClassName;
 import static uk.co.caeldev.cassitory.generators.RepositoryFunctions.constructor;
@@ -44,7 +46,7 @@ public class RepositoryGenerator implements Generator {
                     .addMethod(getTargetClassesMethod)
                     .addModifiers(Modifier.PUBLIC);
 
-            return JavaFile.builder(getPackageName(classAnnotated), type.build())
+            return JavaFile.builder(destinationPackage.apply(classAnnotated, this.elements), type.build())
                     .addStaticImport(ClassName.get("com.google.common.collect", "Lists"), "newArrayList")
                     .build();
         }).collect(toList());
@@ -77,11 +79,7 @@ public class RepositoryGenerator implements Generator {
                 .returns(listOfSupplierType)
                 .addAnnotation(Override.class)
                 .addParameter(ClassName.get(classAnnotated), fieldName.apply(classAnnotated))
-                .addStatement("return new $T($N).creators", ClassName.get(getPackageName(classAnnotated), creatorClassName.apply(classAnnotated)), fieldName.apply(classAnnotated))
+                .addStatement("return new $T($N).creators", ClassName.get(destinationPackage.apply(classAnnotated, this.elements), creatorClassName.apply(classAnnotated)), fieldName.apply(classAnnotated))
                 .build();
-    }
-
-    private String getPackageName(TypeElement classAnnotated) {
-        return this.elements.getPackageOf(classAnnotated).getQualifiedName().toString();
     }
 }

@@ -11,4 +11,6 @@ public @interface CassitoryEntity {
 
     Class<?>[] target();
 
+    String destinationPackage() default "";
+
 }

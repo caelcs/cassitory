@@ -5,8 +5,8 @@ import uk.co.caeldev.cassitory.Mapping;
 import uk.co.caeldev.cassitory.pojos.User;
 import uk.co.caeldev.cassitory.pojos.UserByName;
 
-@CassitoryEntity(target = {User.class, UserByName.class})
-public class UserMoreDto12 {
+@CassitoryEntity(target = {User.class, UserByName.class}, destinationPackage = "entities.repositories")
+public class UserMoreDtoMultipleMap2 {
 
     @Mapping(target = {User.class, UserByName.class})
     private String name;
