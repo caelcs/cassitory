@@ -48,6 +48,9 @@ public class User {
 
     @Column(name = "name")
     private String name;
+    
+    @Column(name = "street")
+    private String street;
 
     //WITH THE SETTERS AND GETTERS
 }
@@ -68,6 +71,9 @@ public class UserByName {
 
     @Column(name = "creation_date")
     private LocalDate creationDate;
+    
+    @Column(name = "address")
+    private String address;
 
     //WITH THE SETTERS AND GETTERS
 }
@@ -90,7 +96,12 @@ class UserDto {
 	@Mapping(target={UserByName.class}, field="creationDate")
 	private LocalDate creationDate;
 
-	@Mapping(target={User.class, UserByName.class}, field="name")
+	@Mapping(target={User.class}, field="name")
+	@Mapping(target={UserByName.class}, field="name")
+	private String name;
+	
+	@Mapping(target={User.class}, field="street")
+	@Mapping(target={UserByName.class}, field="address")
 	private String name;
 
     // GENERATE ALL THE GETTERS AND SETTERS

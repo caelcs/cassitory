@@ -42,16 +42,134 @@ class CassitoryEntityProcessorTest {
         }
 
         @Test
-        @DisplayName("Should fail when Mapping annotation is repeated")
-        public void shouldFailWhenMappingAnnotatedIsRepeated() {
+        @DisplayName("Should allow multiple Mapping annotation on same field")
+        public void shouldAllowMultipleMappingAnnotatedField() {
             Compilation compilation =
                     javac()
                             .withProcessors(new CassitoryEntityProcessor())
-                            .compile(JavaFileObjects.forResource("entities/FooInvalid5.java"));
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto2.java"));
 
-            assertThat(compilation).hadErrorContaining("uk.co.caeldev.cassitory.Mapping is not a repeatable annotation type");
+            assertThat(compilation).succeeded();
+            assertThat(compilation)
+                    .generatedSourceFile("entities.UserMoreDto2Creators")
+                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/UserMoreDto2Creators.java"));
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings for the same field and class, also field name is invalid for one of the entities")
+        public void shouldFailMultipleMappingAnnotatedField() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto3.java"));
+
             assertThat(compilation).failed();
             assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings for the same field and class and field is valid")
+        public void shouldFailWhenThereAreMultipleMappingsForSameClassAndField() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto4.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings but one of them has no field")
+        public void shouldFailWhenThereAreMultipleMappingsForSameClassAndFieldNoFieldDefinition() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto5.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings but one of them has empty field value")
+        public void shouldFailWhenThereAreMultipleMappingsForSameClassAndFieldHasEmptyValue() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto6.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings but all of them have no field definition")
+        public void shouldFailWhenThereAreMultipleMappingsForSameClassAndFieldAndNoFieldDefinition() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto7.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings but all of them have empty")
+        public void shouldFailWhenThereAreMultipleMappingsForSameClassAndFieldAndFieldDefinitionIsEmpty() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto8.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings with multiple targets and all of them have field Definition empty")
+        public void shouldFailWhenThereAreMultipleMappingsForMultipleClassAndFieldAndFieldDefinitionEmpty() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto9.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings with multiple targets and all of them have no field Definition")
+        public void shouldFailWhenThereAreMultipleMappingsForMultipleClassAndFieldAndNoFieldDefinition() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto10.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
+        }
+
+        @Test
+        @DisplayName("Should fail when there are multiple mappings for same field to different fields on derived table")
+        public void shouldFailWhenThereAreMultipleMappingsForSameClassAndDifferentField() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDto11.java"));
+
+            assertThat(compilation).failed();
+            assertThat(compilation).hadErrorCount(1);
+            assertThat(compilation).hadErrorContaining("Target contains duplicated classes");
         }
 
         @Test

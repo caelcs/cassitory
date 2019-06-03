@@ -12,6 +12,7 @@ import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -110,8 +111,14 @@ public class CreatorGenerator implements Generator {
     }
 
     private Map<String, String> getFieldMappings(TypeElement classAnnotated, ClassName targetCassandraEntityClass) {
+        Map<String, String> result = getFieldsFromMapping(classAnnotated, targetCassandraEntityClass, fieldMappings);
+        result.putAll(getFieldsFromMapping(classAnnotated, targetCassandraEntityClass, fieldMapping));
+        return result;
+    }
+
+    private Map<String, String> getFieldsFromMapping(TypeElement classAnnotated, ClassName targetCassandraEntityClass, BiFunction<TypeElement, ClassName, Map<String, String>> fieldsSource) {
         try {
-            return fieldValidation.apply(CreatorFunctions.fieldMapping.apply(classAnnotated, targetCassandraEntityClass));
+            return fieldValidation.apply(fieldsSource.apply(classAnnotated, targetCassandraEntityClass));
         } catch (IllegalArgumentException ex) {
             messager.printMessage(Diagnostic.Kind.ERROR, ex.getMessage());
             return Maps.newHashMap();
