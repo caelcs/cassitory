@@ -1,5 +1,5 @@
 # Cassitory
-[![Development status](https://img.shields.io/badge/status-incubator-green.svg)](https://shields.io/)
+[![Development status](https://img.shields.io/badge/status-Production-green.svg)](https://shields.io/)
 [![Build Status](https://travis-ci.org/caelcs/cassitory.svg?branch=master)](https://travis-ci.org/caelcs/cassitory)
 [![Coverage Status](https://coveralls.io/repos/github/caelcs/cassitory/badge.svg)](https://coveralls.io/github/caelcs/cassitory)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/uk.co.caeldev/cassitory/badge.svg)](https://maven-badges.herokuapp.com/maven-central/uk.co.caeldev/cassitory)
