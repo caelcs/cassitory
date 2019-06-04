@@ -385,5 +385,19 @@ class CassitoryEntityProcessorTest {
                     .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/repositories/UserMoreDtoMultipleMap2BaseRepository.java"));
         }
 
+        @Test
+        @DisplayName("Should create a repository class setting the consistency level")
+        public void shouldCreateRepositorySettingConsistencyLevel() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDtoMultipleMap3.java"));
+
+            assertThat(compilation).succeeded();
+            assertThat(compilation)
+                    .generatedSourceFile("entities.repositories.UserMoreDtoMultipleMap3BaseRepository")
+                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/repositories/UserMoreDtoMultipleMap3BaseRepository.java"));
+        }
+
     }
 }

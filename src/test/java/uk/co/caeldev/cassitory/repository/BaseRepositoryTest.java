@@ -60,8 +60,8 @@ class BaseRepositoryTest {
         when(mappingManager.mapper(UserByName.class)).thenReturn(mapperByName);
 
         //And
-        when(mapper.saveQuery(any(User.class))).thenReturn(saveQuery);
-        when(mapperByName.saveQuery(any(UserByName.class))).thenReturn(saveQueryByName);
+        when(mapper.saveQuery(any(User.class), any(Mapper.Option.class))).thenReturn(saveQuery);
+        when(mapperByName.saveQuery(any(UserByName.class), any(Mapper.Option.class))).thenReturn(saveQueryByName);
 
         //And
         when(mappingManager.getSession()).thenReturn(session);
@@ -71,8 +71,8 @@ class BaseRepositoryTest {
         userDtoRepository.save(userDto);
 
         //Then
-        verify(mapper).saveQuery(any(User.class));
-        verify(mapperByName).saveQuery(any(UserByName.class));
+        verify(mapper).saveQuery(any(User.class), any(Mapper.Option.class));
+        verify(mapperByName).saveQuery(any(UserByName.class), any(Mapper.Option.class));
 
         verify(session).execute(batchStatementArgumentCaptor.capture());
         BatchStatement batchStatement = batchStatementArgumentCaptor.getValue();

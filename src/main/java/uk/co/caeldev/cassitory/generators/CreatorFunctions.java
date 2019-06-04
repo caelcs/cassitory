@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import uk.co.caeldev.cassitory.CommonFunctions;
 import uk.co.caeldev.cassitory.Mapping;
 import uk.co.caeldev.cassitory.Mappings;
 
@@ -117,7 +118,7 @@ public final class CreatorFunctions {
     public static BiFunction<ClassName, Element, Boolean> containsTargetEntityClassInMappings = (ClassName targetCassandraEntity, Element element) -> {
         List<String> targets = targetClassesForMappings.apply(element);
         validateDuplicateTargetClasses.accept(targets);
-        return targets.stream().anyMatch(itr -> itr.contains(targetCassandraEntity.toString() + ".class"));
+        return targets.stream().anyMatch(itr -> itr.contains(CommonFunctions.fullClassName.apply(targetCassandraEntity.toString())));
     };
 
     public static BiFunction<TypeElement, ClassName, Map<String, String>> fieldMapping = (TypeElement entityClassElement, ClassName targetCassandraEntity) ->

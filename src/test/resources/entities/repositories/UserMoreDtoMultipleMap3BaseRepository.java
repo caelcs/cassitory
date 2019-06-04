@@ -5,7 +5,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
-import entities.UserMoreDtoMultipleMap2;
+import entities.UserMoreDtoMultipleMap3;
 import java.lang.Class;
 import java.lang.Override;
 import java.util.List;
@@ -14,14 +14,14 @@ import uk.co.caeldev.cassitory.pojos.User;
 import uk.co.caeldev.cassitory.pojos.UserByName;
 import uk.co.caeldev.cassitory.repository.BaseRepository;
 
-public class UserMoreDtoMultipleMap2BaseRepository extends BaseRepository<UserMoreDtoMultipleMap2> {
-    public UserMoreDtoMultipleMap2BaseRepository(MappingManager mappingManager) {
+public class UserMoreDtoMultipleMap3BaseRepository extends BaseRepository<UserMoreDtoMultipleMap3> {
+    public UserMoreDtoMultipleMap3BaseRepository(MappingManager mappingManager) {
         super(mappingManager);
     }
 
     @Override
-    protected List<Supplier> getCreators(UserMoreDtoMultipleMap2 userMoreDtoMultipleMap2) {
-        return new UserMoreDtoMultipleMap2Creators(userMoreDtoMultipleMap2).creators;
+    protected List<Supplier> getCreators(UserMoreDtoMultipleMap3 userMoreDtoMultipleMap3) {
+        return new UserMoreDtoMultipleMap3Creators(userMoreDtoMultipleMap3).creators;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class UserMoreDtoMultipleMap2BaseRepository extends BaseRepository<UserMo
 
     @Override
     protected Mapper.Option[] getWriteOptions() {
-        List<Mapper.Option> options = newArrayList(Mapper.Option.consistencyLevel(ConsistencyLevel.QUORUM));
+        List<Mapper.Option> options = newArrayList(Mapper.Option.consistencyLevel(ConsistencyLevel.ALL));
         return options.stream().toArray(Mapper.Option[]::new);
     }
 }

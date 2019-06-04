@@ -1,8 +1,9 @@
 package uk.co.caeldev.cassitory.generators;
 
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.mapping.Mapper.Option;
 import com.squareup.javapoet.*;
 import uk.co.caeldev.cassitory.CassitoryEntity;
-import uk.co.caeldev.cassitory.CommonFunctions;
 import uk.co.caeldev.cassitory.repository.BaseRepository;
 
 import javax.lang.model.element.Modifier;
@@ -38,18 +39,38 @@ public class RepositoryGenerator implements Generator {
 
             MethodSpec getTargetClassesMethod = buildGetTargetClassesMethod(classAnnotated);
 
+            MethodSpec getWriteOptionsMethod = buildGetWriteOptionsMethod(classAnnotated);
+
             TypeSpec.Builder type = TypeSpec
                     .classBuilder(repositoryClassName.apply(classAnnotated))
                     .superclass(baseRepositoryClass)
                     .addMethod(constructor.apply(classAnnotated))
                     .addMethod(getCreatorsMethod)
                     .addMethod(getTargetClassesMethod)
+                    .addMethod(getWriteOptionsMethod)
                     .addModifiers(Modifier.PUBLIC);
 
             return JavaFile.builder(destinationPackage.apply(classAnnotated, this.elements), type.build())
                     .addStaticImport(ClassName.get("com.google.common.collect", "Lists"), "newArrayList")
                     .build();
         }).collect(toList());
+    }
+
+    private MethodSpec buildGetWriteOptionsMethod(TypeElement classAnnotated) {
+        ArrayTypeName returnType = ArrayTypeName.of(Option.class);
+        ParameterizedTypeName typeList =
+                ParameterizedTypeName.get(List.class, Option.class);
+
+        ConsistencyLevel consistencyLevel = classAnnotated.getAnnotation(CassitoryEntity.class)
+                .consistencyLevel();
+
+        return MethodSpec.methodBuilder("getWriteOptions")
+                .addModifiers(Modifier.PROTECTED)
+                .addAnnotation(Override.class)
+                .returns(returnType)
+                .addStatement("$T options = newArrayList($T.consistencyLevel($T.$L))", typeList, Option.class, ConsistencyLevel.class, consistencyLevel.name())
+                .addStatement("return options.stream().toArray($T[]::new)", Option.class)
+                .build();
     }
 
     private MethodSpec buildGetTargetClassesMethod(TypeElement classAnnotated) {

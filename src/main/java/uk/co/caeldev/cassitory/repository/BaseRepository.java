@@ -5,6 +5,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.mapping.Mapper;
+import com.datastax.driver.mapping.Mapper.Option;
 import com.datastax.driver.mapping.MappingManager;
 
 import java.util.List;
@@ -28,6 +29,8 @@ public abstract class BaseRepository<T> implements Repository<T> {
 
     protected abstract List<Class> getTargetClasses();
 
+    protected abstract Option[] getWriteOptions();
+
     private Map<Class, Mapper> initMappers() {
         return getTargetClasses().stream()
                 .collect(Collectors.toMap(Function.identity(), (clazz) -> mappingManager.mapper(clazz)));
@@ -38,7 +41,7 @@ public abstract class BaseRepository<T> implements Repository<T> {
         Function<Supplier, Statement> saveQuery = (it) -> {
             Object entity = it.get();
             Mapper mapper = mappers.get(entity.getClass());
-            return mapper.saveQuery(entity);
+            return mapper.saveQuery(entity, getWriteOptions());
         };
 
         return execute(dtoEntity, saveQuery);
@@ -49,7 +52,7 @@ public abstract class BaseRepository<T> implements Repository<T> {
         Function<Supplier, Statement> deleteQuery = (it) -> {
             Object entity = it.get();
             Mapper mapper = mappers.get(entity.getClass());
-            return mapper.deleteQuery(entity);
+            return mapper.deleteQuery(entity, getWriteOptions());
         };
 
         return execute(dtoEntity, deleteQuery);
@@ -60,7 +63,7 @@ public abstract class BaseRepository<T> implements Repository<T> {
         Function<Supplier, Statement> saveQuery = (it) -> {
             Object entity = it.get();
             Mapper mapper = mappers.get(entity.getClass());
-            return mapper.saveQuery(entity);
+            return mapper.saveQuery(entity, getWriteOptions());
         };
 
         return executeAsync(dtoEntity, saveQuery);
@@ -71,7 +74,7 @@ public abstract class BaseRepository<T> implements Repository<T> {
         Function<Supplier, Statement> deleteQuery = (it) -> {
             Object entity = it.get();
             Mapper mapper = mappers.get(entity.getClass());
-            return mapper.deleteQuery(entity);
+            return mapper.deleteQuery(entity, getWriteOptions());
         };
 
         return executeAsync(dtoEntity, deleteQuery);

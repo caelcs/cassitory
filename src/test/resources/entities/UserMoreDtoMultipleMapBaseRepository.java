@@ -2,6 +2,8 @@ package entities;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import java.lang.Class;
 import java.lang.Override;
@@ -24,5 +26,11 @@ public class UserMoreDtoMultipleMapBaseRepository extends BaseRepository<UserMor
     @Override
     protected List<Class> getTargetClasses() {
         return newArrayList(User.class, UserByName.class);
+    }
+
+    @Override
+    protected Mapper.Option[] getWriteOptions() {
+        List<Mapper.Option> options = newArrayList(Mapper.Option.consistencyLevel(ConsistencyLevel.QUORUM));
+        return options.stream().toArray(Mapper.Option[]::new);
     }
 }

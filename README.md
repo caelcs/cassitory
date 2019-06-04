@@ -107,6 +107,30 @@ class UserDto {
 }
 ```
 NOTE: you can define the destinationPackage field in CassandraEntity where you want to generate all the classes.
+
+As you can see there are a few ways to use Mapping annotation:
+
+```java
+//Map the field to the classes User and Username and populate in //each of them the field name.
+@Mapping(target={User.class, UserByName.class}, field="name")
+private String name;
+
+//Because the field name in this entity is the same than the ones in //the Cassandra entities you can omit the field value.
+@Mapping(target={User.class, UserByName.class})
+private String name;
+
+//In the case where you have different field names in your Cassandra //entities you can do this
+@Mapping(target={User.class}, field="name" )
+@Mapping(target={UserByName.class}, field="fullname")
+private String name;
+
+//And last, you can combine both approaches
+@Mapping(target={User.class}, field="name" )
+@Mapping(target={UserByName.class, UserByAge.class}, field="fullname")
+private String name;
+
+```
+
 ### Finally
 
 After you annotate your classes Cassitory will generate a Base Repository class per class annotated.
