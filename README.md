@@ -106,8 +106,55 @@ class UserDto {
     // GENERATE ALL THE GETTERS AND SETTERS
 }
 ```
+
+### Finally
+
+After you annotate your classes Cassitory will generate a Base Repository class per class annotated.
+the convention will be, for instance if your DTO class is UserDto... you will be able to find UserDtoBaseRespository.
+
+```java
+MappingManager mappingManager;
+
+UserDtoBaseRespository repository = new UserDtoBaseRespository(mappingManager);
+
+```
+
+It can be easly integrate with Spring, Guice or any other DI framework extending this class and adding the annotation or by Java Config or Module.
+
+### Annotations spec
+
 NOTE: you can define the destinationPackage field in CassandraEntity where you want to generate all the classes.
 
+### @CassitoryEntity
+Use this annotation to generate the a repository using Mapper Manager and Cassandra entities.
+
+```java
+@CassitoryEntity(target={User.class})
+class UserDto
+```
+
+There are few optional parameters like:
+
+**destinationPackage:** where all the generated code will be using. By default is the the same package than the annotated class.
+```java
+@CassitoryEntity(target={User.class}, destinationPackage="company.repositories")
+class UserDto
+```
+
+**consistencyLevel:** set the consistency level for all the write operations whithin the repository. By default is QUORUM. 
+```java
+@CassitoryEntity(target={User.class}, consistencyLevel=ConsistencyLevel.ONE)
+class UserDto
+```
+
+**tracing:** enable tracing option for all the write operations whithin the repository. By default is false. 
+```java
+@CassitoryEntity(target={User.class}, tracing=true)
+class UserDto
+```
+
+### @Mapping
+Use this annotation to describe how to map a field in your Dto to the different Cassandra entities.
 As you can see there are a few ways to use Mapping annotation:
 
 ```java
@@ -131,19 +178,6 @@ private String name;
 
 ```
 
-### Finally
-
-After you annotate your classes Cassitory will generate a Base Repository class per class annotated.
-the convention will be, for instance if your DTO class is UserDto... you will be able to find UserDtoBaseRespository.
-
-```java
-MappingManager mappingManager;
-
-UserDtoBaseRespository repository = new UserDtoBaseRespository(mappingManager);
-
-```
-
-It can be easly integrate with Spring, Guice or any other DI framework extending this class and adding the annotation or by Java Config or Module.
 
 
 
