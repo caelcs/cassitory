@@ -17,4 +17,6 @@ public @interface CassitoryEntity {
 
     ConsistencyLevel consistencyLevel() default ConsistencyLevel.QUORUM;
 
+    boolean tracing() default false;
+
 }

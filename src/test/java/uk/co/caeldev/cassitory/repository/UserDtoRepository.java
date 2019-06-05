@@ -32,7 +32,7 @@ public class UserDtoRepository extends BaseRepository<UserDto> {
 
     @Override
     protected Mapper.Option[] getWriteOptions() {
-        List<Mapper.Option> options = newArrayList(Mapper.Option.consistencyLevel(ConsistencyLevel.QUORUM));
+        List<Mapper.Option> options = newArrayList(Mapper.Option.consistencyLevel(ConsistencyLevel.QUORUM), Mapper.Option.tracing(false));
         return options.stream().toArray(Mapper.Option[]::new);
     }
 }

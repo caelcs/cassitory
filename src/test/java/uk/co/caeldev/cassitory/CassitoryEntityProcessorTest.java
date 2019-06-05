@@ -399,5 +399,19 @@ class CassitoryEntityProcessorTest {
                     .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/repositories/UserMoreDtoMultipleMap3BaseRepository.java"));
         }
 
+        @Test
+        @DisplayName("Should create a repository class setting the tracing to true")
+        public void shouldCreateRepositorySettingTracing() {
+            Compilation compilation =
+                    javac()
+                            .withProcessors(new CassitoryEntityProcessor())
+                            .compile(JavaFileObjects.forResource("entities/UserMoreDtoMultipleMap4.java"));
+
+            assertThat(compilation).succeeded();
+            assertThat(compilation)
+                    .generatedSourceFile("entities.repositories.UserMoreDtoMultipleMap4BaseRepository")
+                    .hasSourceEquivalentTo(JavaFileObjects.forResource("entities/repositories/UserMoreDtoMultipleMap4BaseRepository.java"));
+        }
+
     }
 }

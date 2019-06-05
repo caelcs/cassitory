@@ -61,14 +61,15 @@ public class RepositoryGenerator implements Generator {
         ParameterizedTypeName typeList =
                 ParameterizedTypeName.get(List.class, Option.class);
 
-        ConsistencyLevel consistencyLevel = classAnnotated.getAnnotation(CassitoryEntity.class)
-                .consistencyLevel();
+        CassitoryEntity annotation = classAnnotated.getAnnotation(CassitoryEntity.class);
+        ConsistencyLevel consistencyLevel = annotation.consistencyLevel();
+        boolean tracing = annotation.tracing();
 
         return MethodSpec.methodBuilder("getWriteOptions")
                 .addModifiers(Modifier.PROTECTED)
                 .addAnnotation(Override.class)
                 .returns(returnType)
-                .addStatement("$T options = newArrayList($T.consistencyLevel($T.$L))", typeList, Option.class, ConsistencyLevel.class, consistencyLevel.name())
+                .addStatement("$T options = newArrayList($T.consistencyLevel($T.$L), $T.tracing($L))", typeList, Option.class, ConsistencyLevel.class, consistencyLevel.name(), Option.class, tracing)
                 .addStatement("return options.stream().toArray($T[]::new)", Option.class)
                 .build();
     }
