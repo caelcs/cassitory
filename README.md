@@ -15,6 +15,8 @@ Although you will still need to have your cassandra entities but no Repositories
 Instead you will have DTO that contains the data and knows how to map to each Cassandra entity and a Single repository to handle all the persistence layer to the multiple tables.
 Based on the mapping it will create an instance of each Cassandra Entity and save it.
 
+**ASYNC** is awesome! so you can save and delete using async operations but also provides a sunc way in case that you have go down that route.
+
 **No Reflexion**:
 Cassitory does not use reflexion to do all the operations that provides abd because of it there are some compromises if you want to use it.
 
