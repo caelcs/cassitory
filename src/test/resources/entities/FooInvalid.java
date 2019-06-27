@@ -1,6 +1,6 @@
 package entities;
 
-import uk.co.caeldev.cassitory.CassitoryEntity;
+import uk.co.caeldev.cassitory.entities.CassitoryEntity;
 
 public class FooInvalid {
 

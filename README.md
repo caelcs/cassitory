@@ -15,171 +15,55 @@ Although you will still need to have your cassandra entities but no Repositories
 Instead you will have DTO that contains the data and knows how to map to each Cassandra entity and a Single repository to handle all the persistence layer to the multiple tables.
 Based on the mapping it will create an instance of each Cassandra Entity and save it.
 
-**ASYNC** is awesome! so you can save and delete using async operations but also provides a sunc way in case that you have go down that route.
+**ASYNC** is awesome! so you can save and delete using async operations but also provides a sync way in case that you have go down that route.
 
-**No Reflexion**:
-Cassitory does not use reflexion to do all the operations that provides abd because of it there are some compromises if you want to use it.
+**NO REFLEXION**:
+Cassitory does not use reflexion to do all the operations that provides and because of it there are some compromises if you want to use it.
 
 - Your Cassandra entities must have a Getters and Setters.
 - Your DTO must have Getters.
 
 Cassitory use annotation processing to generate code than otherwise you would have to write it and it is quite good that if there is any error you would get it at compile time.
 
+
+**Important Release Note**:
+
+up to 0.2.0: supports only Mappers Repositories
+higher than 1.0.0: support for Mappers and Prepered statements**  
+
 ## Motivation
 it is well known that Cassandra recommends de-normalisation of your model. Meaning that in order to support different search criteria for searching the data, Cassandra recommends to create a redundancy table 
 having as partition key the fields that you want search for. Applying this pattern in your application could be very difficult to maintain. it would be nice to have a generic repository that allowing you to 
 have support multiple tables and also execute queries and decide which table is the correct one.
 
-## Steps to use the library
+## Introduction
 Cassitory is quite simple to use just following the steps and it will give you a Repository for your DTO ready to use in your application.
+Cassitory gives you two type of repositories. 
 
-### Step 1: Create your cassandra entities
-First you create your Cassandra Entities mapping to your tables as you would do it normally.
-Eg. asumming that you have two tables, users and users_by_name. This would it mean two Cassandra entities more like this:
+#### Using Cassandra entities
+The first one is by using Cassandra Entities Classes where you have to create your POJO and annotate them using Cassandra Object Mapper library.
+and apart of those POJO you will have to create your DTO entity and annotate it with Cassitory annotations and it will be used to map the values to your Cassandra entities.
+Here you have the annotations that you will have to use:
 
-```java
-@Table(keyspace = "ks", name = "users",
-       readConsistency = "QUORUM",
-       writeConsistency = "QUORUM",
-       caseSensitiveKeyspace = false,
-       caseSensitiveTable = false)
-public class User {
-    @PartitionKey
-    @Column(name = "user_id")
-    private UUID userId;
+```uk.co.caeldev.cassitory.entities.CassitoryEntity```
+```uk.co.caeldev.cassitory.entities.Mapping```
 
-    @Column(name = "name")
-    private String name;
-    
-    @Column(name = "street")
-    private String street;
+#### Using Prepared Statements and queries
+with this repo you don't have to create your Cassandra entities, just your DTO annotated with Cassitory annotations.
+Here you have the annotations that you will have to use:
 
-    //WITH THE SETTERS AND GETTERS
-}
+```uk.co.caeldev.cassitory.statements.CassitoryEntity```
+```uk.co.caeldev.cassitory.statements.Mapping```
 
-@Table(keyspace = "ks", name = "users_by_name",
-       readConsistency = "QUORUM",
-       writeConsistency = "QUORUM",
-       caseSensitiveKeyspace = false,
-       caseSensitiveTable = false)
-public class UserByName {
-    @PartitionKey(0)
-    @Column(name = "user_id")
-    private UUID userId;
-
-    @PartitionKey(1)
-    @Column(name = "full_name")
-    private String name;
-
-    @Column(name = "creation_date")
-    private LocalDate creationDate;
-    
-    @Column(name = "address")
-    private String address;
-
-    //WITH THE SETTERS AND GETTERS
-}
-```
-NOTE: for version 1, there a convention that, let say that your main table is USERS, and USERS_BY_NAME is derived the beans needs to have the same name of fields.
-Also all the getters and setters. I have some ideas to support more things but for version 1 it will be like this.
-
-### Step 2: Create your DTO.
-
-Cassitory works by using the DTO as placeholder for the data that you want to persist and it will hold how to map to the Cassandra entities.
-Following the eg. above this would looks like this.
-
-```java
-@CassitoryEntity(target={UserByName.class, User.class})
-class UserDto {
-	
-	@Mapping(target={User.class, UserByName.class}, field="userId")
-	private String id;
-
-	@Mapping(target={UserByName.class}, field="creationDate")
-	private LocalDate creationDate;
-
-	@Mapping(target={User.class, UserByName.class})
-	private String name;
-	
-	@Mapping(target={User.class}, field="street")
-	@Mapping(target={UserByName.class}, field="address")
-	private String address;
-
-    // GENERATE ALL THE GETTERS AND SETTERS
-}
-```
-
-### Finally
-
-After you annotate your classes Cassitory will generate a Base Repository class per class annotated.
-the convention will be, for instance if your DTO class is UserDto... you will be able to find UserDtoBaseRespository.
-
-```java
-MappingManager mappingManager;
-
-UserDtoBaseRespository repository = new UserDtoBaseRespository(mappingManager);
+### How to use it
+Add to your gradle dependency to run the annotation processor:
 
 ```
-
-It can be easly integrate with Spring, Guice or any other DI framework extending this class and adding the annotation or by Java Config or Module.
-
-### Annotations spec
-
-NOTE: you can define the destinationPackage field in CassandraEntity where you want to generate all the classes.
-
-### @CassitoryEntity
-Use this annotation to generate the a repository using Mapper Manager and Cassandra entities.
-
-```java
-@CassitoryEntity(target={User.class})
-class UserDto
+annotationProcessor 'uk.co.caeldev:cassitory:0.2.0'
 ```
 
-There are few optional parameters like:
+then annotate your DTO class with the Cassitory annotations that fits better for your project. 
 
-**destinationPackage:** where all the generated code will be using. By default is the the same package than the annotated class.
-```java
-@CassitoryEntity(target={User.class}, destinationPackage="company.repositories")
-class UserDto
-```
-
-**consistencyLevel:** set the consistency level for all the write operations whithin the repository. By default is QUORUM. 
-```java
-@CassitoryEntity(target={User.class}, consistencyLevel=ConsistencyLevel.ONE)
-class UserDto
-```
-
-**tracing:** enable tracing option for all the write operations whithin the repository. By default is false. 
-```java
-@CassitoryEntity(target={User.class}, tracing=true)
-class UserDto
-```
-
-### @Mapping
-Use this annotation to describe how to map a field in your Dto to the different Cassandra entities.
-As you can see there are a few ways to use Mapping annotation:
-
-```java
-//Map the field to the classes User and Username and populate in //each of them the field name.
-@Mapping(target={User.class, UserByName.class}, field="name")
-private String name;
-
-//Because the field name in this entity is the same than the ones in //the Cassandra entities you can omit the field value.
-@Mapping(target={User.class, UserByName.class})
-private String name;
-
-//In the case where you have different field names in your Cassandra //entities you can do this
-@Mapping(target={User.class}, field="name" )
-@Mapping(target={UserByName.class}, field="fullname")
-private String name;
-
-//And last, you can combine both approaches
-@Mapping(target={User.class}, field="name" )
-@Mapping(target={UserByName.class, UserByAge.class}, field="fullname")
-private String name;
-
-```
-
-
-
-
+- [Using Cassandra Mappers](https://github.com/caelcs/cassitory/wiki/Cassitory-using-Entity-Mappers) 
+- [Using Cassandra prepared statements](https://github.com/caelcs/cassitory/wiki/Cassitory-using-only-prepared-statements)
+ 

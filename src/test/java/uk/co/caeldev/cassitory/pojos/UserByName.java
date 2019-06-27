@@ -4,7 +4,7 @@ import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
 
-@Table(keyspace = "security", name = "usersByName",
+@Table(keyspace = "security2", name = "usersByName",
         readConsistency = "QUORUM",
         writeConsistency = "QUORUM")
 public class UserByName {

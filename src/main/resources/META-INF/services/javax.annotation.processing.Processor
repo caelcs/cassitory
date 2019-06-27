@@ -1,1 +1,2 @@
-uk.co.caeldev.cassitory.CassitoryEntityProcessor
+uk.co.caeldev.cassitory.entities.CassitoryEntityProcessor
+uk.co.caeldev.cassitory.statements.CassitoryEntityProcessor

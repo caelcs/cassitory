@@ -1,7 +1,7 @@
 package uk.co.caeldev.cassitory.pojos;
 
-import uk.co.caeldev.cassitory.CassitoryEntity;
-import uk.co.caeldev.cassitory.Mapping;
+import uk.co.caeldev.cassitory.entities.CassitoryEntity;
+import uk.co.caeldev.cassitory.entities.Mapping;
 
 @CassitoryEntity(target = {User.class, UserByName.class})
 public class UserDto {

@@ -10,9 +10,9 @@ import java.lang.Class;
 import java.lang.Override;
 import java.util.List;
 import java.util.function.Supplier;
+import uk.co.caeldev.cassitory.entities.repositories.BaseRepository;
 import uk.co.caeldev.cassitory.pojos.User;
 import uk.co.caeldev.cassitory.pojos.UserByName;
-import uk.co.caeldev.cassitory.repository.BaseRepository;
 
 public class UserMoreDtoMultipleMap3BaseRepository extends BaseRepository<UserMoreDtoMultipleMap3> {
     public UserMoreDtoMultipleMap3BaseRepository(MappingManager mappingManager) {

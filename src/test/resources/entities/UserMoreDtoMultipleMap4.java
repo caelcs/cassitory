@@ -1,8 +1,8 @@
 package entities;
 
 import com.datastax.driver.core.ConsistencyLevel;
-import uk.co.caeldev.cassitory.CassitoryEntity;
-import uk.co.caeldev.cassitory.Mapping;
+import uk.co.caeldev.cassitory.entities.CassitoryEntity;
+import uk.co.caeldev.cassitory.entities.Mapping;
 import uk.co.caeldev.cassitory.pojos.User;
 import uk.co.caeldev.cassitory.pojos.UserByName;
 
