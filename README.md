@@ -28,8 +28,8 @@ Cassitory use annotation processing to generate code than otherwise you would ha
 
 **Important Release Note**:
 
-up to 0.2.1: supports only Mappers Repositories
-higher than 1.0.0: support for Mappers and Prepered statements**  
+- **up to 0.2.1**: supports only Mappers Repositories
+- **higher than 1.0.0**: support for Mappers and Prepered statements
 
 ## Motivation
 it is well known that Cassandra recommends de-normalisation of your model. Meaning that in order to support different search criteria for searching the data, Cassandra recommends to create a redundancy table 
