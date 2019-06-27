@@ -28,7 +28,7 @@ Cassitory use annotation processing to generate code than otherwise you would ha
 
 **Important Release Note**:
 
-up to 0.2.0: supports only Mappers Repositories
+up to 0.2.1: supports only Mappers Repositories
 higher than 1.0.0: support for Mappers and Prepered statements**  
 
 ## Motivation
@@ -59,7 +59,11 @@ Here you have the annotations that you will have to use:
 Add to your gradle dependency to run the annotation processor:
 
 ```
-annotationProcessor 'uk.co.caeldev:cassitory:0.2.0'
+annotationProcessor 'uk.co.caeldev:cassitory:0.2.1'
+
+or 
+
+annotationProcessor 'uk.co.caeldev:cassitory:1.0.0'
 ```
 
 then annotate your DTO class with the Cassitory annotations that fits better for your project. 
