@@ -45,15 +45,15 @@ The first one is by using Cassandra Entities Classes where you have to create yo
 and apart of those POJO you will have to create your DTO entity and annotate it with Cassitory annotations and it will be used to map the values to your Cassandra entities.
 Here you have the annotations that you will have to use:
 
-```uk.co.caeldev.cassitory.entities.CassitoryEntity```
-```uk.co.caeldev.cassitory.entities.Mapping```
+- ```uk.co.caeldev.cassitory.entities.CassitoryEntity```
+- ```uk.co.caeldev.cassitory.entities.Mapping```
 
 #### Using Prepared Statements and queries
 with this repo you don't have to create your Cassandra entities, just your DTO annotated with Cassitory annotations.
 Here you have the annotations that you will have to use:
 
-```uk.co.caeldev.cassitory.statements.CassitoryEntity```
-```uk.co.caeldev.cassitory.statements.Mapping```
+- ```uk.co.caeldev.cassitory.statements.CassitoryEntity```
+- ```uk.co.caeldev.cassitory.statements.Mapping```
 
 ### How to use it
 Add to your gradle dependency to run the annotation processor:
