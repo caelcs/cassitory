@@ -56,17 +56,9 @@ Here you have the annotations that you will have to use:
 - ```uk.co.caeldev.cassitory.statements.Mapping```
 
 ### How to use it
-Add to your gradle dependency to run the annotation processor:
+Add to your gradle dependency to run the annotation processor and follow one of the two kind of repositories that Cassitory offers you.
 
-```
-annotationProcessor 'uk.co.caeldev:cassitory:0.2.1'
-
-or 
-
-annotationProcessor 'uk.co.caeldev:cassitory:1.0.0'
-```
-
-then annotate your DTO class with the Cassitory annotations that fits better for your project. 
+finally annotate your DTO class with the Cassitory annotations that fits better for your project. 
 
 - [Using Cassandra Mappers](https://github.com/caelcs/cassitory/wiki/Cassitory-using-Entity-Mappers) 
 - [Using Cassandra prepared statements](https://github.com/caelcs/cassitory/wiki/Cassitory-using-only-prepared-statements)
